@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Alertas do Sistema - Supermercado Pinheiro</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #dc3545;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .alerta {
+            border-left: 6px solid red;
+            background: #ffecec;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .ok {
+            border-left: 6px solid green;
+            background: #e8ffee;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            background: #0078d7;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            button:hover {
+                background: #005fa3;
+            }
+
+        .voltar {
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🚨 Alertas do Sistema</h1>
+        <p>Controle de produtos com problemas no estoque</p>
+    </header>
+
+    <div class="container">
+
+        <button onclick="carregarAlertas()">🔄 Atualizar alertas</button>
+
+        <h2 style="margin-top:25px;">Produtos com estoque baixo</h2>
+        <div id="alertasEstoque">Carregando...</div>
+
+        <div class="voltar">
+            <button onclick="window.location.href='../dashboard.html'">
+                ⬅ Voltar para Dashboard
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+    async function carregarAlertas() {
+
+        const lista = document.getElementById("alertasEstoque");
+        lista.innerHTML = "";
+
+        try {
+            const response = await fetch('/api/produto');
+            const produtos = await response.json();
+
+            if (produtos.length === 0) {
+                lista.innerHTML = `<p>Nenhum produto cadastrado.</p>`;
+                return;
+            }
+
+            let totalAlertas = 0;
+
+            produtos.forEach(produto => {
+
+                if (produto.quantidade <= 10) {
+                    totalAlertas++;
+
+                    const alerta = document.createElement("div");
+                    alerta.className = "alerta";
+                    alerta.innerHTML = `
+                        <b>⚠ Produto:</b> ${produto.nome}<br>
+                        <b>Quantidade:</b> ${produto.quantidade}<br>
+                        <b>Status:</b> ESTOQUE BAIXO
+                    `;
+                    lista.appendChild(alerta);
+                }
+
+            });
+
+            if (totalAlertas == 0) {
+                lista.innerHTML = `
+                    <div class="alerta ok">
+                        ✅ Todos os produtos estão com estoque OK
+                    </div>
+                `;
+            }
+
+        } catch (erro) {
+            lista.innerHTML = `<p>Erro ao carregar alertas</p>`;
+        }
+    }
+
+    carregarAlertas();
+    </script>
+
+</body>
+</html>

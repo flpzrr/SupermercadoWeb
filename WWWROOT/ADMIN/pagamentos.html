@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Formas de Pagamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #0078d7;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        button {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #005fa3;
+            }
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #0078d7;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+        .novo-pagamento {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+            .novo-pagamento input {
+                flex: 1;
+                padding: 10px;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                font-size: 14px;
+            }
+
+            .novo-pagamento button {
+                background-color: #28a745; /* verde para salvar */
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: background 0.3s ease;
+            }
+
+                .novo-pagamento button:hover {
+                    background-color: #218838;
+                }
+
+        #mensagem {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Formas de Pagamento</h1>
+
+        <table id="tabelaPagamentos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome da Forma</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Registros preenchidos dinamicamente -->
+            </tbody>
+        </table>
+
+        <div class="actions">
+            <button id="btnAdicionar">Adicionar Nova Forma</button>
+            <a href="/dashboard.html">Voltar para Dashboard</a>
+        </div>
+
+        <!-- Container para input de nova forma -->
+        <div id="inputContainer"></div>
+
+        <!-- Mensagem de erro/sucesso -->
+        <p id="mensagem" style="color:red;"></p>
+    </div>
+
+    <script>
+        const tabela = document.getElementById('tabelaPagamentos').getElementsByTagName('tbody')[0];
+        const inputContainer = document.getElementById('inputContainer');
+        const mensagem = document.getElementById('mensagem');
+
+        // Carrega as formas de pagamento
+        async function carregarPagamentos() {
+            try {
+                const response = await fetch('/api/FormaPagamento');
+                if (!response.ok) throw new Error(await response.text());
+                const data = await response.json();
+
+                tabela.innerHTML = '';
+                data.forEach(p => {
+                    const linha = tabela.insertRow();
+                    linha.insertCell(0).innerText = p.id;
+                    linha.insertCell(1).innerText = p.nome;
+                    const cellAcoes = linha.insertCell(2);
+                    cellAcoes.innerHTML = `<button onclick="removerPagamento(${p.id}, this)">Remover</button>`;
+                });
+            } catch (err) {
+                console.error("Erro ao carregar pagamentos:", err);
+                mensagem.style.color = "red";
+                mensagem.innerText = "Erro ao carregar formas de pagamento.";
+            }
+        }
+
+        // Adiciona campo de input para nova forma
+        document.getElementById('btnAdicionar').addEventListener('click', () => {
+            inputContainer.innerHTML = `
+                    <div class="novo-pagamento">
+                        <input type="text" id="novoNome" placeholder="Digite o nome da forma">
+                        <button id="btnSalvar">Salvar</button>
+                    </div>
+                `;
+            document.getElementById('btnSalvar').addEventListener('click', adicionarPagamento);
+        });
+
+        // Adiciona nova forma via API
+        async function adicionarPagamento() {
+            const input = document.getElementById('novoNome');
+            const nome = input.value.trim();
+            if (!nome) {
+                mensagem.style.color = "red";
+                mensagem.innerText = "Digite um nome válido.";
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/FormaPagamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    mensagem.style.color = "red";
+                    mensagem.innerText = data.erro || "Erro ao adicionar forma";
+                    return;
+                }
+
+                mensagem.style.color = "green";
+                mensagem.innerText = data.mensagem || "Adicionado com sucesso!";
+                inputContainer.innerHTML = '';
+                carregarPagamentos();
+
+                // ===========================
+                // ATUALIZA INDEX.HTML AUTOMATICAMENTE
+                // ===========================
+                localStorage.setItem('pagamentoAtualizado', Date.now());
+
+            } catch (err) {
+                console.error("Erro ao adicionar forma:", err);
+                mensagem.style.color = "red";
+                mensagem.innerText = "Erro ao adicionar forma";
+            }
+        }
+
+        // Remove forma via API
+        async function removerPagamento(id, botao) {
+            if (!confirm("Deseja realmente remover esta forma?")) return;
+
+            try {
+                const response = await fetch(`/api/FormaPagamento/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    mensagem.style.color = "red";
+                    mensagem.innerText = data.erro || "Erro ao remover forma";
+                    return;
+                }
+
+                mensagem.style.color = "green";
+                mensagem.innerText = data.mensagem || "Removido com sucesso!";
+                const linha = botao.parentElement.parentElement;
+                linha.remove();
+
+                // Atualiza index.html após remoção
+                localStorage.setItem('pagamentoAtualizado', Date.now());
+
+            } catch (err) {
+                console.error("Erro ao remover forma:", err);
+                mensagem.style.color = "red";
+                mensagem.innerText = "Erro ao remover forma";
+            }
+        }
+
+        // Inicializa
+        carregarPagamentos();
+    </script>
+</body>
+</html>

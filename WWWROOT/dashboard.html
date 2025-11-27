@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Supermercado Pinheiro</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #0078d7;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        main {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+            .card:hover {
+                transform: scale(1.05);
+                cursor: pointer;
+            }
+
+        button {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s ease;
+        }
+
+            button:hover {
+                background: #005fa3;
+            }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Sistema Supermercado Pinheiro</h1>
+        <p>Gerencie produtos, pagamentos e alertas</p>
+    </header>
+
+    <main>
+
+        <!-- PRODUTOS -->
+        <div class="card">
+            <h2>🛍️ Produtos</h2>
+            <p>Cadastre e atualize os produtos do estoque</p>
+            <button onclick="window.location.href='/admin/produtos.html'">Acessar</button>
+        </div>
+
+        <!-- PAGAMENTOS -->
+        <div class="card">
+            <h2>💳 Pagamentos</h2>
+            <p>Gerencie as formas de pagamento</p>
+            <button onclick="window.location.href='/admin/pagamentos.html'">Acessar</button>
+        </div>
+
+        <!-- ALERTAS -->
+        <div class="card">
+            <h2>🚨 Alertas do Sistema</h2>
+            <p>Visualize alertas de estoque baixo e produtos vencendo</p>
+            <button onclick="window.location.href='/admin/alertas.html'">Acessar</button>
+        </div>
+
+        <!-- SISTEMA PRINCIPAL -->
+        <div class="card">
+            <h2>🏠 Sistema Principal</h2>
+            <p>Voltar para a página inicial do sistema</p>
+            <button onclick="window.location.href='/index.html'">Acessar</button>
+        </div>
+
+    </main>
+
+</body>
+</html>
